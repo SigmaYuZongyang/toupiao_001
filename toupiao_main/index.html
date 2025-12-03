@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园投票系统</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            font-size: 14px;
+            font-weight: 300;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .vote-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .vote-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .vote-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        }
+
+        .vote-card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .vote-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .vote-card.option1 .vote-icon {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .vote-card.option2 .vote-icon {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .vote-card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .vote-card-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .vote-count {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .count-label {
+            font-size: 13px;
+            color: #999;
+            font-weight: 500;
+        }
+
+        .count-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0;
+        }
+
+        .button-container {
+            margin-top: 30px;
+        }
+
+        .vote-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .vote-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .vote-button:active {
+            transform: translateY(0);
+        }
+
+        .vote-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .share-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .share-section.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .share-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .share-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .share-link input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+            background: white;
+        }
+
+        .copy-button {
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-button:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+
+        .success-message {
+            display: none;
+            padding: 16px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 26px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .vote-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>校园投票</h1>
+            <p>选择你所在的位置</p>
+        </div>
+
+        <div class="content">
+            <div class="vote-card option1" data-option="1">
+                <div class="vote-card-header">
+                    <div class="vote-icon">🏫</div>
+                    <div class="vote-card-title">在校内</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress1"></div>
+                </div>
+                <div class="vote-count">
+                    <span class="count-label">票数</span>
+                    <span class="count-value" id="count1">0</span>
+                </div>
+            </div>
+
+            <div class="vote-card option2" data-option="2">
+                <div class="vote-card-header">
+                    <div class="vote-icon">🌆</div>
+                    <div class="vote-card-title">在校外</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress2"></div>
+                </div>
+                <div class="vote-count">
+                    <span class="count-label">票数</span>
+                    <span class="count-value" id="count2">0</span>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <button class="vote-button" id="voteBtn">提交投票</button>
+            </div>
+
+            <div class="share-section" id="shareSection">
+                <div class="share-title">分享投票链接</div>
+                <div class="share-link">
+                    <input type="text" id="shareLink" readonly>
+                    <button class="copy-button" id="copyBtn">复制</button>
+                </div>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                投票成功！感谢你的参与
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase 配置 -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase 配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyD8f4Z3z7e8R9t5Y6u7i8o9p0a1s2d3f4",
+            authDomain: "voting-app-12345.firebaseapp.com",
+            databaseURL: "https://voting-app-12345-default-rtdb.firebaseio.com",
+            projectId: "voting-app-12345",
+            storageBucket: "voting-app-12345.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:1a2b3c4d5e6f7g8h9i0j"
+        };
+
+        // 初始化 Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let selectedOption = null;
+        let voteData = {
+            option1: 0,
+            option2: 0
+        };
+
+        // 从 Firebase 加载数据
+        database.ref('votes').on('value', function(snapshot) {
+            if (snapshot.exists()) {
+                voteData = snapshot.val();
+            } else {
+                // 初始化数据
+                voteData = {
+                    option1: 0,
+                    option2: 0
+                };
+                database.ref('votes').set(voteData);
+            }
+            updateVoteDisplay();
+        });
+
+        // 投票卡片点击事件
+        document.querySelectorAll('.vote-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // 移除所有选中状态
+                document.querySelectorAll('.vote-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                // 添加当前选中状态
+                this.classList.add('selected');
+                selectedOption = this.dataset.option;
+            });
+        });
+
+        // 投票按钮点击事件
+        document.getElementById('voteBtn').addEventListener('click', function() {
+            if (selectedOption === null) {
+                alert('请先选择一个选项');
+                return;
+            }
+
+            // 更新投票数据
+            if (selectedOption === '1') {
+                voteData.option1++;
+            } else if (selectedOption === '2') {
+                voteData.option2++;
+            }
+
+            // 保存到 Firebase
+            database.ref('votes').set(voteData);
+
+            // 显示成功消息
+            document.getElementById('successMessage').classList.add('active');
+
+            // 显示分享区域
+            document.getElementById('shareSection').classList.add('active');
+
+            // 禁用投票按钮
+            this.disabled = true;
+            this.textContent = '已投票';
+        });
+
+        // 复制链接按钮点击事件
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const shareLink = document.getElementById('shareLink');
+            shareLink.select();
+            shareLink.setSelectionRange(0, 99999);
+            
+            navigator.clipboard.writeText(shareLink.value).then(() => {
+                const originalText = this.textContent;
+                this.textContent = '已复制';
+                this.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.style.background = '#667eea';
+                }, 2000);
+            });
+        });
+
+        // 更新投票显示
+        function updateVoteDisplay() {
+            const totalVotes = voteData.option1 + voteData.option2;
+
+            // 更新票数
+            document.getElementById('count1').textContent = voteData.option1;
+            document.getElementById('count2').textContent = voteData.option2;
+
+            // 更新进度条
+            if (totalVotes > 0) {
+                const percentage1 = (voteData.option1 / totalVotes) * 100;
+                const percentage2 = (voteData.option2 / totalVotes) * 100;
+
+                document.getElementById('progress1').style.width = percentage1 + '%';
+                document.getElementById('progress2').style.width = percentage2 + '%';
+            }
+        }
+
+        // 设置分享链接
+        document.getElementById('shareLink').value = window.location.href;
+    </script>
+</body>
+</html>
